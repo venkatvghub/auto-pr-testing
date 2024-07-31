@@ -1,0 +1,194 @@
+<table class="min-w-full text-left text-sm font-light">
+    <div class="flex justify-between items-center px-6 py-4" style="word-wrap: break-word; max-width: 100%;">
+        <div class="whitespace-nowrap" style="word-wrap: break-word; max-width: 200px;">
+            <p>URLs to access resources</p>
+            {{if gt (len .data.Deployments) 0}} <!-- Check if there are any deployments -->
+            {{with $firstDeployment := index .data.Deployments 0}} <!-- Access the first deployment -->
+            {{range $firstDeployment.Hosts}} <!-- Iterate over all hosts in the first deployment -->
+            <br> <a href="https://{{.}}" style="word-wrap: break-word; max-width: 100px;">{{.}}</a>
+            {{end}}
+            {{end}}
+            {{end}}
+        </div>
+        <div class="whitespace-nowrap" style="word-wrap: break-word; max-width: 200px;">
+            {{if gt (len .data.Deployments) 0}} <!-- Check if there are any deployments -->
+            {{with $firstDeployment := index .data.Deployments 0}} <!-- Access the first deployment -->
+            <button data-bs-toggle="modal" data-bs-target="#updateTTLModal"
+                class="inline-flex items-center px-2 py-1 text-xs text-white transition-colors duration-150 bg-green-500 rounded hover:bg-green-600">
+                Update TTL
+            </button>
+            <div id="updateTTLModal" class="modal modal-blur fade" style="display: none" aria-hidden="false" tabindex="-1">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Select TTL value</h5>
+                        </div>
+                        <div class="modal-body">
+                            <form id="updateTTLForm">
+                                <div class="mb-3">
+                                    <label for="newTTL" class="form-label">New TTL:</label>
+                                    <div class="input-group">
+                                        <select class="form-select" id="newTTL" name="ttl" required>
+                                            <option value="7d">7 days</option>
+                                            <option value="10d">10 days</option>
+                                            <option value="15d">15 days(max)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    <button type="submit" class="btn btn-primary" hx-include="#newTTL" hx-post="/ui/v1/namespace/manage/update-ns-ttl?namespace={{$firstDeployment.Namespace}}&ttl=4d" hx-target="#main-content"
+                                    hx-trigger="click" hx-swap="outerHTML">Update TTL</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {{end}}
+            {{end}}
+        </div>
+    </div>            
+    <thead class="border-b font-medium dark:border-neutral-500">
+        <tr>
+            <th scope="col" class="px-6 py-4">Name</th>
+            <!-- <th scope="col" class="px-6 py-4">URL</th> -->
+            <th scope="col" class="px-6 py-4">Replicas</th>
+            <th scope="col" class="px-6 py-4">Commit</th>
+            <th scope="col" class="px-6 py-4">Actions</th>
+            <th scope="col" class="px-6 py-4"></th>
+        </tr>
+    </thead>
+    {{if .data}}
+    {{range .data.Deployments}}
+    <tr id="datarow-{{.Name}}" class="border-b dark:border-neutral-500">
+        <td class="whitespace-nowrap px-6 py-4" style="word-wrap: break-word; max-width: 200px;">{{.Name}}
+        </td>
+        <td class="whitespace-nowrap px-6 py-4" style="word-wrap: break-word; max-width: 50px;">
+            {{.Replicas}}
+            {{if eq .Replicas 0}}
+            <button data-bs-toggle="modal" data-bs-target="#scaleUpModal-replica-{{.Name}}"
+                class="ml-2 inline-flex items-center px-2 py-1 text-xs text-white transition-colors duration-150 bg-green-500 rounded hover:bg-green-600">
+                Scale Up
+            </button>
+            <!-- Modal -->
+            <div class="modal fade" id="scaleUpModal-replica-{{.Name}}" tabindex="-1"
+                aria-labelledby="scaleModalLabel-replica" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="scaleModalLabel-{{.Name}}">Scale Replicas</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            Scale up replica to 1?
+                        </div>
+                        <div class="modal-footer">
+                            <!-- Todo pass the deployment name and namespace name to the backend -->
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary"
+                                hx-get="/ui/v1/namespace/manage/scale-replicas?deployment={{.Name}}&namespace={{.Namespace}}&action=up"
+                                hx-trigger="click" hx-target="#main-content" hx-swap="outerHTML">Scale to
+                                1</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {{else}}
+            <button data-bs-toggle="modal" data-bs-target="#scaleDownModal-replica-{{.Name}}"
+                class="ml-2 inline-flex items-center px-2 py-1 text-xs text-white transition-colors duration-150 bg-red-500 rounded hover:bg-red-600">
+                Scale Down
+            </button>
+            <!--Modal for scale down-->
+            <div class="modal fade" id="scaleDownModal-replica-{{.Name}}" tabindex="-1"
+                aria-labelledby="scaleModalLabel-replica" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="scaleModalLabel-{{.Name}}">Scale Replicas</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            Are you sure you want to scale down the replicas ?
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary"
+                                hx-get="/ui/v1/namespace/manage/scale-replicas?deployment={{.Name}}&namespace={{.Namespace}}&action=down"
+                                hx-trigger="click" hx-target="#main-content" hx-swap="outerHTML">Scale to
+                                0</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {{end}}
+        </td>
+        <td class="px-6 py-4" style="word-wrap: break-word; max-width: 200px;">{{.CommitID}}</td>
+        <td class="px-6 py-4" style="word-wrap: break-word; max-width: 50px;">
+            <div>
+                <button data-bs-toggle="modal" data-bs-target="#updateImageModal-{{.Name}}"
+                    class="inline-flex items-center px-2 py-1 text-xs text-white transition-colors duration-150 bg-blue-500 rounded hover:bg-blue-600">
+                    Update Image
+                </button>
+                <div id="updateImageModal-{{.Name}}" class="modal modal-blur fade" style="display: none"
+                    aria-hidden="false" tabindex="-1">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Enter Commit ID</h5>
+                            </div>
+                            <div class="modal-body">
+                                <form id="updateImageForm-{{.Name}}" hx-post="/ui/v1/namespace/manage/update-image"
+                                    hx-target="#main-content" hx-trigger="submit" hx-swap="outerHTML">
+                                    <input type="hidden" name="namespace" value="{{.Namespace}}">
+                                    <input type="hidden" name="deployment" value="{{.Name}}">
+                                    <input type="hidden" name="container" value="{{.ContainerName}}">
+                                    <div class="mb-3">
+                                        <label for="newImage-{{.Name}}" class="form-label">New Image URL:</label>
+                                        <input type="text" class="form-control" id="newImage-{{.Name}}" name="image"
+                                            required>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary"
+                                            data-bs-dismiss="modal">Close</button>
+                                        <button type="submit" class="btn btn-primary">Update Image</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </td>
+        <td class="px-6 py-4" style="word-wrap: break-word; max-width: 50px;">
+            <button
+                hx-get="/ui/v1/namespace/manage/update-env-values-modal?deployment={{.Name}}&namespace={{.Namespace}}"
+                hx-target="#updateEnvModal-{{.Name}}" hx-trigger="click" data-bs-toggle="modal"
+                data-bs-target="#updateEnvModal-{{.Name}}" class=" inline-flex items-center px-2 py-1 text-xs text-white transition-colors duration-150
+                bg-blue-500 rounded hover:bg-blue-600">
+                Update Env
+            </button>
+            <div id="updateEnvModal-{{.Name}}" class="modal modal-blur fade" style="display: none" aria-hidden="false"
+                tabindex="-1">
+                <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+                    <div class="modal-content"></div>
+                </div>
+            </div>
+        </td>
+    </tr>
+    {{end}}
+    {{end}}
+    <tr>
+        <td colspan="5">
+            <div
+                style="margin-top: 20px; padding: 10px; background-color: #f8f9fa; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <strong>Pod Details</strong>
+                <button hx-get="/ui/v1/namespace/manage/pod-details?namespace={{.namespace}}" hx-trigger="load, click"
+                    hx-target="#pod-details-{{.namespace}}" hx-swap="innerHTML" class="btn btn-secondary">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+                <div style="padding-top: 10px;" id="pod-details-{{.namespace}}"></div>
+            </div>
+        </td>
+    </tr>
+</table>

@@ -1,0 +1,25 @@
+services:
+  lms:
+    namespace: demo-service
+    depends_on:
+      - "Sahukar"
+      - "mmp"
+    env:
+      # https & http needs to be handled
+      - name: SAHUKAR_HOST
+        value: http://test-sahukar-service.demo-service.svc.cluster.local/sahukar/api/v1/
+      - name: MMP_BASEQUAD_HOST
+        value: http://test-mmp-svc-service.demo-2-service.svc.cluster.local
+    entity: "QFPL"
+  sahukar:
+    namespace: demo-2-service
+    depends_on:
+      - "Sahukar"
+      - "mmp"
+    env:
+      # https & http needs to be handled
+      - name: SAHUKAR_HOST
+        value: http://test-sahukar-service.demo-2-service.svc.cluster.local/sahukar/api/v1/
+      - name: MMP_BASEQUAD_HOST
+        value: http://test-mmp-svc-service.demo-2-service.svc.cluster.local
+    entity: "QFPL"
