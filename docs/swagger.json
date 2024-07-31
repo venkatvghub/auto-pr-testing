@@ -1,0 +1,1338 @@
+{
+    "schemes": [
+        "http",
+        "https"
+    ],
+    "swagger": "2.0",
+    "info": {
+        "description": "Kubernetes Braavos API URI:\u003cbr\u003e\u0026nbsp;\u0026nbsp;https://{nw-server-hostname}:8080/api/v1\u003cbr\u003e\u003cbr\u003e",
+        "title": "Kubernetes Braavos API",
+        "contact": {},
+        "version": "3.0.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/api/v1",
+    "paths": {
+        "/": {
+            "get": {
+                "description": "Renders the index.html template",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "text/html"
+                ],
+                "tags": [
+                    "index"
+                ],
+                "summary": "Show the index page",
+                "responses": {
+                    "200": {
+                        "description": "index.html",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/pullrequest": {
+            "post": {
+                "description": "Create a pull request based on the provided request body",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "GitHub"
+                ],
+                "summary": "Generate a pull request",
+                "parameters": [
+                    {
+                        "description": "Pull Request Request Body",
+                        "name": "requestBody",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github.PullRequestRequestBodyDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Pull Request created",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/argo-cd/onboarding": {
+            "get": {
+                "description": "Displays the Argo CD onboarding page",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "text/html"
+                ],
+                "tags": [
+                    "argo"
+                ],
+                "summary": "Argo CD onboarding",
+                "responses": {
+                    "200": {
+                        "description": "argo-cd-onboarding.html",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/cohorts": {
+            "get": {
+                "description": "Get services present in cohort file",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Get services for cohort",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/cohorts/deployment": {
+            "post": {
+                "description": "Create a new namespace , clone all service entities into the new namespace and overide image \u0026 configs",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Deploy a cohort",
+                "parameters": [
+                    {
+                        "description": "Cohort Deployment Request Body",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.CohortDeploymentRequestBody"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/configmaps/:configmap": {
+            "post": {
+                "description": "Update a config map in a specific namespace",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Update a config map",
+                "parameters": [
+                    {
+                        "description": "ConfigMap Update Request Body",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.ConfigMapPatchRequestBody"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/deployment/env-values": {
+            "post": {
+                "description": "Updates the environment values of a deployment",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "text/html"
+                ],
+                "tags": [
+                    "deployments"
+                ],
+                "summary": "Update deployment environment values",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Deployment",
+                        "name": "deployment",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Namespace",
+                        "name": "namespace",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Environment Variables (JSON)",
+                        "name": "envVars",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "manage-namespaces.html",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid envVars format",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/deployment/env-values/modal": {
+            "get": {
+                "description": "Displays a modal to update environment values of a deployment",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "text/html"
+                ],
+                "tags": [
+                    "deployments"
+                ],
+                "summary": "Update environment values modal",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Deployment",
+                        "name": "deployment",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Namespace",
+                        "name": "namespace",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "manage-update-env-values-modal.html",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/deployment/image": {
+            "post": {
+                "description": "Updates the image of a specific container in a deployment",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "text/html"
+                ],
+                "tags": [
+                    "deployments"
+                ],
+                "summary": "Update deployment image",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Deployment",
+                        "name": "deployment",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Container",
+                        "name": "container",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Namespace",
+                        "name": "namespace",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Image",
+                        "name": "image",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "manage-namespaces.html",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/deployment/scale": {
+            "get": {
+                "description": "Scales up or down the replicas of a deployment",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "text/html"
+                ],
+                "tags": [
+                    "deployments"
+                ],
+                "summary": "Scale replicas",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Deployment",
+                        "name": "deployment",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Namespace",
+                        "name": "namespace",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Action (up or down)",
+                        "name": "action",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "manage-namespaces.html",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/deployments/:deployment": {
+            "post": {
+                "description": "Update the image of a deployment in a specific namespace",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Update deployment image",
+                "parameters": [
+                    {
+                        "description": "Deployment Image Set Request Body",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.DeploymentPatchRequestBody"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/generate-manifests": {
+            "post": {
+                "description": "Generates Kubernetes manifests based on the provided request data and returns a zip file containing the manifests.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/octet-stream"
+                ],
+                "tags": [
+                    "manifests"
+                ],
+                "summary": "Generate Kubernetes manifests",
+                "parameters": [
+                    {
+                        "description": "Request body",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/argo.RequestDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Generated manifests zip file",
+                        "schema": {
+                            "type": "file"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/namespace/clone": {
+            "post": {
+                "description": "Clones a namespace",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "text/html"
+                ],
+                "tags": [
+                    "namespaces"
+                ],
+                "summary": "Clone namespace",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Source Namespace",
+                        "name": "source_namespace",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Destination Namespace",
+                        "name": "destination_namespace",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "manage-namespaces.html",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Source and target namespaces cannot be the same",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/namespace/clone/modal": {
+            "get": {
+                "description": "Displays a modal to clone a namespace",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "text/html"
+                ],
+                "tags": [
+                    "namespaces"
+                ],
+                "summary": "Clone namespace modal",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Namespace",
+                        "name": "namespace",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "clone-namespace-modal.html",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/namespace/details": {
+            "get": {
+                "description": "Retrieves and displays details of a specific namespace",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "text/html"
+                ],
+                "tags": [
+                    "namespaces"
+                ],
+                "summary": "Get namespace details",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Namespace ID",
+                        "name": "namespaceId",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "manage-namespace-details.html",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/namespace/ttl": {
+            "post": {
+                "description": "Updates the TTL of a namespace",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "text/html"
+                ],
+                "tags": [
+                    "namespaces"
+                ],
+                "summary": "Update TTL",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Namespace",
+                        "name": "namespace",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "TTL",
+                        "name": "ttl",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "manage-namespaces.html",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/namespaces": {
+            "get": {
+                "description": "Get all namespaces in the cluster",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Get all namespaces",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/namespaces/:namespace/cloneNamespace": {
+            "post": {
+                "description": "Clone a namespace and its objects to a new namespace",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Clone a namespace",
+                "parameters": [
+                    {
+                        "description": "Namespace clone request body",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.NSClonerRequestBody"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/namespaces/:namespace/configmaps/display": {
+            "get": {
+                "description": "Display all config maps in the specified namespace",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Display config maps for a specific namespace",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Namespace name",
+                        "name": "namespace",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/namespaces/:namespace/deployments": {
+            "get": {
+                "description": "Get all deployments in the specified namespace",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Get deployments for a specific namespace",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Namespace name",
+                        "name": "namespace",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/namespaces/:namespace/deployments/:deployment/scaledown": {
+            "post": {
+                "description": "Decrease the replica count of a deployment in a specific namespace",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Scale down a deployment",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Namespace name",
+                        "name": "namespace",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Deployment name",
+                        "name": "deployment",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully scaled down the deployment",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/namespaces/:namespace/deployments/:deployment/scaleup": {
+            "post": {
+                "description": "Increase the replica count of a deployment in a specific namespace",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Scale up a deployment",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Namespace name",
+                        "name": "namespace",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Deployment name",
+                        "name": "deployment",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully scaled up the deployment",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/namespaces/:namespace/deployments/display": {
+            "get": {
+                "description": "Display all deployments in the specified namespace",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Display deployments for a specific namespace",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Namespace name",
+                        "name": "namespace",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/namespaces/:namespace/secrets/display": {
+            "get": {
+                "description": "Display all secrets in the specified namespace",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Display secrets for a specific namespace",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Namespace name",
+                        "name": "namespace",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/namespaces/clonable": {
+            "get": {
+                "description": "Retrieves and displays a list of namespaces that can be cloned",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "text/html"
+                ],
+                "tags": [
+                    "namespaces"
+                ],
+                "summary": "List clonable namespaces",
+                "responses": {
+                    "200": {
+                        "description": "cloneable-namespace-list.html",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/namespaces/manage": {
+            "get": {
+                "description": "Retrieves and displays a list of managed namespaces",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "text/html"
+                ],
+                "tags": [
+                    "namespaces"
+                ],
+                "summary": "Manage namespaces",
+                "responses": {
+                    "200": {
+                        "description": "manage-namespaces.html",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/namespaces/{namespace}/cronjobs/{cronJob}/scaledown": {
+            "post": {
+                "description": "Decrease the number of instances for a specified CronJob in a given namespace",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "CronJob"
+                ],
+                "summary": "Scale down a CronJob",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Namespace",
+                        "name": "namespace",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "CronJob Name",
+                        "name": "cronJob",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully scaled down the CronJob",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/namespaces/{namespace}/cronjobs/{cronJob}/scaleup": {
+            "post": {
+                "description": "Increase the number of instances for a specified CronJob in a given namespace",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "CronJob"
+                ],
+                "summary": "Scale up a CronJob",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Namespace",
+                        "name": "namespace",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "CronJob Name",
+                        "name": "cronJob",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully scaled up the CronJob",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/pod/details": {
+            "get": {
+                "description": "Retrieves and displays details of a specific pod",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "text/html"
+                ],
+                "tags": [
+                    "pods"
+                ],
+                "summary": "Get pod details",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Namespace",
+                        "name": "namespace",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "manage-pod-details.html",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/secrets/:secret": {
+            "post": {
+                "description": "Update a secret in a specific namespace",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Update a secret",
+                "parameters": [
+                    {
+                        "description": "Secret Update Request Body",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.SecretPatchRequestBody"
+                        }
+                    },
+                    {
+                        "description": "Secret patch request body",
+                        "name": "secretPatchRequestBody",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.SecretPatchRequestBody"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "api.CohortDeploymentRequestBody": {
+            "type": "object",
+            "properties": {
+                "cohort": {
+                    "type": "string"
+                },
+                "feature_name": {
+                    "type": "string"
+                },
+                "services_config": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.ServiceConfigRequest"
+                    }
+                }
+            }
+        },
+        "api.ConfigMapPatchRequestBody": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "namespace": {
+                    "type": "string"
+                }
+            }
+        },
+        "api.DeploymentPatchRequestBody": {
+            "type": "object",
+            "properties": {
+                "container": {
+                    "description": "Deployment string `json:\"deployment\"`",
+                    "type": "string"
+                },
+                "image": {
+                    "type": "string"
+                },
+                "namespace": {
+                    "type": "string"
+                }
+            }
+        },
+        "api.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "api.NSClonerRequestBody": {
+            "type": "object",
+            "properties": {
+                "targetNamespace": {
+                    "description": "SourceNamespace string `json:\"sourceNamespace\"`",
+                    "type": "string"
+                }
+            }
+        },
+        "api.SecretPatchRequestBody": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "namespace": {
+                    "type": "string"
+                }
+            }
+        },
+        "api.ServiceConfigRequest": {
+            "type": "object",
+            "properties": {
+                "image": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "argo.KeyVal": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            }
+        },
+        "argo.RequestDTO": {
+            "type": "object",
+            "properties": {
+                "appPort": {
+                    "type": "string"
+                },
+                "architecture": {
+                    "type": "string"
+                },
+                "autoScaling": {
+                    "type": "string"
+                },
+                "entity": {
+                    "type": "string"
+                },
+                "environment": {
+                    "type": "string"
+                },
+                "envvars": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/argo.KeyVal"
+                    }
+                },
+                "healthCheckPort": {
+                    "type": "string"
+                },
+                "imageTag": {
+                    "type": "string"
+                },
+                "includeBeta": {
+                    "type": "string"
+                },
+                "livenessHealthCheckPath": {
+                    "type": "string"
+                },
+                "metricsPath": {
+                    "type": "string"
+                },
+                "metricsPort": {
+                    "type": "string"
+                },
+                "publicAccess": {
+                    "type": "string"
+                },
+                "readinessHealthCheckPath": {
+                    "type": "string"
+                },
+                "secrets": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/argo.KeyVal"
+                    }
+                },
+                "secretsPath": {
+                    "type": "string"
+                },
+                "servicename": {
+                    "type": "string"
+                },
+                "startupCheckPath": {
+                    "type": "string"
+                },
+                "team": {
+                    "type": "string"
+                }
+            }
+        },
+        "github.PullRequestRequestBodyDTO": {
+            "type": "object",
+            "required": [
+                "commitMessage",
+                "prBody",
+                "prTitle",
+                "repo",
+                "sourceDir",
+                "user"
+            ],
+            "properties": {
+                "commitMessage": {
+                    "type": "string"
+                },
+                "prBody": {
+                    "type": "string"
+                },
+                "prTitle": {
+                    "type": "string"
+                },
+                "repo": {
+                    "type": "string"
+                },
+                "sourceDir": {
+                    "type": "string"
+                },
+                "targetDir": {
+                    "type": "string"
+                },
+                "user": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}
