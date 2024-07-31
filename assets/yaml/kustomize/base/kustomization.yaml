@@ -1,0 +1,24 @@
+kind: Kustomization
+apiVersion: kustomize.config.k8s.io/v1beta1
+
+resources:
+- namespace.yaml
+- deployment.yaml
+- service.yaml
+- virtualservice.yaml
+{{- if .AutoScaling }}
+- keda.yaml
+{{- end }}
+{{- if .SecretsPath }}
+- externalsecrets.yaml
+{{- end }}
+
+
+{{- if and (eq .EnvPrefix "prod") (eq .IncludeBeta "yes") }}
+- beta-deployment.yaml
+- beta-service.yaml
+- beta-virtualservice.yaml
+{{- if .AutoScaling }}
+- beta-keda.yaml
+{{- end }}
+{{- end }}

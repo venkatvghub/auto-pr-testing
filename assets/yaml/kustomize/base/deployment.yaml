@@ -1,0 +1,123 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: {{ .ServiceName }}
+  name: {{ .ServiceName }}
+spec:
+  {{- if not .AutoScaling }}
+  replicas: 0 # will be overlayed from overlay/deployment_patch.yaml
+  {{- end }}
+  selector:
+    matchLabels:
+      app: {{ .ServiceName }}
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        prometheus.io/port: "{{ .MetricsPort }}"
+        prometheus.io/scheme: http
+        prometheus.io/scrape: "true"
+        prometheus.io/path: {{ .MetricsPath }}
+      labels:
+        app: {{ .ServiceName }}
+        ENVIRONMENT: {{ .Env }}
+        SERVICE: {{ .ServiceName }}
+        POD: {{ .Team }}
+    spec:
+      # serviceAccountName: {{ .Env }}-{{ .Entity }}-{{ .ServiceName }}
+      dnsConfig:
+        options:
+          - name: ndots
+            value: "2"
+      containers:
+        - name: {{ .ServiceName }}
+          image: ENTITY.dkr.ecr.ap-south-1.amazonaws.com/{{ .ServiceName }} # will be overlayed from overlay/image_patch.yaml
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: {{ .AppPort }}
+              protocol: TCP
+            - containerPort: {{ .HealthCheckPort }}
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: {{ .ServiceName }}
+          {{- if .AddSecretsPath }}
+            - secretRef:
+                name: {{ .ServiceName }}
+          {{- end }}
+          StartupProbe:
+            failureThreshold: 3
+            httpGet:
+              path: {{ .StartupCheckPath }}
+              port: {{ .HealthCheckPort }}
+              scheme: HTTP
+            initialDelaySeconds: 120
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 3
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: {{ .LivenessHealthCheckPath }}
+              port: {{ .HealthCheckPort }}
+              scheme: HTTP
+            initialDelaySeconds: 120
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 3
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: {{ .ReadinessHealthCheckPath }}
+              port: {{ .HealthCheckPort }}
+              scheme: HTTP
+            initialDelaySeconds: 120
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 3
+          resources: # will be overlayed from overlay/deployment_patch.yaml
+            requests:
+              cpu: 0
+              memory: 0Mi
+            limits:
+              cpu: 0
+              memory: 0Mi
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      terminationGracePeriodSeconds: 30
+      securityContext: {}
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: {{ .NodeSelectorKey }}
+                    operator: "In"
+                    values:
+                      - {{ .NodeSelectorValue }}
+      nodeSelector:
+        kubernetes.io/arch: {{ .Architecture }}
+      tolerations:
+      - key: {{ .TolerationKey }}
+        value: {{ .TolerationValue }}
+        effect: NoSchedule
+        operator: Equal
+      
+      {{- if eq .Env "prod"}}
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app: {{ .ServiceName  }}
+      {{- end}}
+

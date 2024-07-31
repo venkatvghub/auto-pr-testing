@@ -1,0 +1,24 @@
+<div>
+    <table class="min-w-full text-left text-sm font-light">
+        <thead>
+            <tr class="bg-gray-100">
+                <th class="px-4 py-2">Pod Name</th>
+                <th class="px-4 py-2">Ready</th>
+                <th class="px-4 py-2">Status</th>
+                <th class="px-4 py-2">Restarts</th>
+                <th class="px-4 py-2">Age</th>
+            </tr>
+        </thead>
+        <tbody id="pods-info">
+            {{range .data.Pods}}
+            <tr class="bg-gray-200">
+                <td class="px-4 py-2">{{.Name}}</td>
+                <td class="px-4 py-2">{{.Ready}}</td>
+                <td class="px-4 py-2">{{.Status}}</td>
+                <td class="px-4 py-2">{{.Restarts}}</td>
+                <td class="px-4 py-2">{{.Age}}</td>
+            </tr>
+            {{end}}
+        </tbody>
+    </table>
+</div>

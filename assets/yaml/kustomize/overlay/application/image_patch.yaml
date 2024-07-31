@@ -1,0 +1,3 @@
+- op: replace
+  path: /spec/template/spec/containers/0/image
+  value: {{ .AwsAccountId }}.dkr.ecr.ap-south-1.amazonaws.com/{{ .ServiceName }}:{{ .ImageTag }}

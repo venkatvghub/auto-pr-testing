@@ -1,0 +1,24 @@
+{{ range . }}
+<tr id="datarow-{{.namespace}}" class="border-b dark:border-neutral-500">
+  <td class="whitespace-nowrap px-6 py-4">{{.namespace}}</td>
+  <td class="whitespace-nowrap px-6 py-4">{{.pod}}</td>
+  <td class="whitespace-nowrap px-6 py-4">{{.app}}</td>
+  <td class="whitespace-nowrap px-1 py-1">
+    <button hx-get="/ui/v1/namespace/clone/modal?namespace={{.namespace}}" hx-target="#modals-here-{{.namespace}}"
+      hx-trigger="click" data-bs-toggle="modal" data-bs-target="#modals-here-{{.namespace}}"
+      class="inline-flex items-center h-8 px-4 m-2 text-sm text-blue-100 transition-colors duration-150 bg-blue-700 rounded-lg focus:shadow-outline hover:bg-blue-800">
+      Clone Namespace
+    </button>
+    <div id="modals-here-{{.namespace}}" class="modal modal-blur fade" style="display: none" aria-hidden="false"
+      tabindex="-1">
+      <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div id="cloning-message" style="display: none; padding: 20px; font-size: 16px;">
+            Cloning...
+          </div>
+        </div>
+      </div>
+    </div>
+  </td>
+</tr>
+{{ end }}

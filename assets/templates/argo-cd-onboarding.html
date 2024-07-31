@@ -1,0 +1,280 @@
+<div class="container" id="main-content" >
+  <span class="close-button" onclick="closeContainer()">&times;</span>
+  <h1>Create New Service</h1>
+  <br>
+  <div class="form-group">
+    <label for="environment-select">Choose environment below *</label>
+    <select id="environment-select" name="environment" class="form-control" onchange="toggleBetaAndAutoScaling()">
+      <option value="prod">prod</option>
+      <option value="test">test</option>
+    </select>
+  </div>
+
+  <div class="form-group" id="beta-option-group">
+    <label for="include-beta-select">Include Beta? *</label>
+    <select id="include-beta-select" name="includeBeta" class="form-control">
+      <option value="no">No</option>
+      <option value="yes">Yes</option>
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label for="entity-select">Choose entity below *</label>
+    <select id="entity-select" name="entity" class="form-control">
+      <option value="gipl">gipl</option>
+      <option value="qfpl">qfpl</option>
+      <option value="ifpl">ifpl</option>
+      <option value="nesfb">nesfb</option>
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label for="team-input">Team Name</label>
+    <input type="text" id="team-input" name="team" required placeholder="Team name tag" class="form-control">
+  </div>
+
+  <div class="form-group">
+    <label for="public-access-select">Require public access via internet (Virtual Service)? *</label>
+    <select id="public-access-select" name="publicAccess" class="form-control">
+      <option value="no">No</option>
+      <option value="yes">Yes</option>
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label for="service-name-input">Service Name *</label>
+    <input type="text" id="service-name-input" name="ServiceName" required placeholder="Name must match the GitHub repository name" class="form-control">
+  </div>
+
+  <div class="form-group">
+    <label for="app-port-input">Application Port *</label>
+    <input type="text" id="app-port-input" name="AppPort" required placeholder="8080" class="form-control">
+  </div>
+
+  <div class="form-group">
+    <label for="health-check-port-input">Health Check Port *</label>
+    <input type="text" id="health-check-port-input" name="HealthCheckPort" required placeholder="9999" class="form-control">
+  </div>
+
+  <div class="form-group">
+    <label for="startup-check-path-input">Startup Probe Check Path *</label>
+    <input type="text" id="startup-check-path-input" name="StartupCheckPath" required placeholder="/actuator/start" class="form-control">
+  </div>
+
+  <div class="form-group">
+    <label for="liveness-check-path-input">Liveness Health Check Path *</label>
+    <input type="text" id="liveness-check-path-input" name="LivenessHealthCheckPath" required placeholder="/actuator/healthz" class="form-control">
+  </div>
+
+  <div class="form-group">
+    <label for="readiness-check-path-input">Readiness Health Check Path *</label>
+    <input type="text" id="readiness-check-path-input" name="ReadinessHealthCheckPath" required placeholder="/actuator/readyz" class="form-control">
+  </div>
+
+  <div class="form-group">
+    <label for="metrics-path-input">Metrics Path *</label>
+    <input type="text" id="metrics-path-input" name="MetricsPath" required placeholder="/metrics" class="form-control">
+  </div>
+
+  <div class="form-group">
+    <label for="metrics-port-input">Metrics Port *</label>
+    <input type="text" id="metrics-port-input" name="MetricsPort" required placeholder="9998" class="form-control">
+  </div>
+
+  <div class="form-group">
+    <label for="image-tag-input">Container Image Tag (obtained from GitHub pipeline) *</label>
+    <input type="text" id="image-tag-input" name="ImageTag" required placeholder="master-abcd1234" class="form-control">
+  </div>
+
+  <div class="form-group">
+    <label for="architecture-select">Architecture *</label>
+    <select id="architecture-select" name="architecture" class="form-control">
+      <option value="amd64">amd64</option>
+      <option value="arm64">arm64</option>
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label for="secrets-path-input">Secret Manager Path</label>
+    <input type="text" id="secrets-path-input" name="secretsPath" placeholder="/test/volantis/secrets" class="form-control">
+  </div>
+
+  <div class="form-group" id="auto-scaling-group">
+    <label for="auto-scaling-select">Enable Auto Scaling? (KEDA)</label>
+    <select id="auto-scaling-select" name="autoScaling" class="form-control">
+      <option value="no">No</option>
+      <option value="yes">Yes</option>
+    </select>
+  </div>
+
+  <div id="env-vars-container" class="mt-3">
+    <label for="env-vars-container" style="font-weight:bold">Application Environment Variables</label>
+  </div>
+  <button class="btn btn-primary" onclick="addEnvVar()">+ Add Env Variable</button>
+
+  <p></p>
+  <div style="text-align: center;">
+    <button class="btn btn-success" onclick="generateArgoManifests()">Submit for Generation</button>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Hide the betaOption and auto-scaling div on page load
+    document.getElementById('beta-option-group').style.display = 'none';
+    document.getElementById('auto-scaling-group').style.display = 'none';
+  });
+
+  function generateArgoManifests() {
+    const environment = document.getElementById('environment-select').value;
+    const includeBeta = document.getElementById('include-beta-select').value;
+
+    if (isFormIncomplete()) {
+      alert("Please fill all required fields");
+      return;
+    }
+
+    if (environment === "prod" && includeBeta === "") {
+      alert("Please fill all required fields for production");
+      return;
+    }
+
+    const payload = gatherFormData();
+    sendFormDataToBackend(payload);
+  }
+
+  function isFormIncomplete() {
+    const requiredFields = [
+      'environment-select', 'entity-select', 'team-input', 'service-name-input',
+      'app-port-input', 'health-check-port-input', 'startup-check-path-input',
+      'liveness-check-path-input', 'readiness-check-path-input', 'metrics-path-input',
+      'metrics-port-input', 'image-tag-input', 'architecture-select'
+    ];
+
+    for (const id of requiredFields) {
+      if (document.getElementById(id).value.trim() === '') {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  function gatherFormData() {
+    const environment = document.getElementById('environment-select').value;
+    const entity = document.getElementById('entity-select').value;
+    const team = document.getElementById('team-input').value;
+    const appPort = document.getElementById('app-port-input').value;
+    const healthCheckPort = document.getElementById('health-check-port-input').value;
+    const startupCheckPath = document.getElementById('startup-check-path-input').value;
+    const livenessHealthCheckPath = document.getElementById('liveness-check-path-input').value;
+    const readinessHealthCheckPath = document.getElementById('readiness-check-path-input').value;
+    const metricsPath = document.getElementById('metrics-path-input').value;
+    const metricsPort = document.getElementById('metrics-port-input').value;
+    const imageTag = document.getElementById('image-tag-input').value;
+    const publicAccess = document.getElementById('public-access-select').value;
+    const secretsPath = document.getElementById('secrets-path-input').value;
+    const autoScaling = document.getElementById('auto-scaling-select').value;
+    const architecture = document.getElementById('architecture-select').value;
+    const includeBeta = document.getElementById('include-beta-select').value;
+
+    const envvars = Array.from(document.querySelectorAll('input[name="envKey[]"]')).map((input, index) => ({
+      name: input.value,
+      value: document.querySelectorAll('input[name="envValue[]"]')[index].value
+    }));
+
+    return {
+      environment,
+      entity,
+      team,
+      servicename: document.getElementById('service-name-input').value,
+      appPort,
+      healthCheckPort,
+      startupCheckPath,
+      livenessHealthCheckPath,
+      readinessHealthCheckPath,
+      metricsPath,
+      metricsPort,
+      imageTag,
+      envvars,
+      publicAccess,
+      secretsPath,
+      autoScaling,
+      architecture,
+      includeBeta
+    };
+  }
+
+  function sendFormDataToBackend(payload) {
+    const xhr = new XMLHttpRequest();
+    const backendUri = window.location.href + "api/v1/argo/generate/";
+
+    xhr.open("POST", backendUri);
+    xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xhr.responseType = 'json';
+
+    xhr.onload = function() {
+      if (xhr.status === 200) {
+        handleSuccessfulResponse(xhr);
+      } else {
+        alert("Failed to download file");
+      }
+    };
+
+    xhr.onerror = function() {
+      alert("Failed to make the request");
+    };
+
+    xhr.responseType = "arraybuffer";
+    xhr.send(JSON.stringify(payload));
+  }
+
+  function handleSuccessfulResponse(xhr) {
+    const blob = new Blob([xhr.response], { type: "application/octet-stream" });
+    const contentDisposition = xhr.getResponseHeader("Content-Disposition");
+    const filename = contentDisposition.split("filename=")[1].trim();
+
+    if (window.navigator.msSaveOrOpenBlob) {
+      window.navigator.msSaveOrOpenBlob(blob, filename);
+    } else {
+      const link = document.createElement('a');
+      link.href = window.URL.createObjectURL(blob);
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+    alert(`File downloaded successfully. \n\nUse the 'unzip' command to extract the downloaded file: \n$ unzip ${filename}\n\nAnd raise a PR to GitHub in the ${document.getElementById('entity-select').value} entity / ${document.getElementById('environment-select').value}-argo`);
+  }
+
+  function toggleBetaAndAutoScaling() {
+    const environment = document.getElementById('environment-select').value;
+    document.getElementById('beta-option-group').style.display = environment === "prod" ? "block" : "none";
+    document.getElementById('auto-scaling-group').style.display = environment === "prod" ? "block" : "none";
+  }
+
+  function addEnvVar() {
+    const envContainer = document.getElementById('env-vars-container');
+
+    const envDiv = document.createElement('div');
+    envDiv.classList.add('env-vars-item');
+
+    envDiv.innerHTML = `
+      <div class="m-4">
+        <label class="ml-4" for="env-key">Name</label>
+        <input type="text" name="envKey[]" placeholder="DB_USER_NAME" class="form-control" required>
+        <label for="env-value">Plaintext Value</label>
+        <input type="text" name="envValue[]" placeholder="app_user" class="form-control" required>
+        <button class="btn btn-danger" onclick="removeEnvVar(this)">Remove</button>
+      </div>
+    `;
+    envContainer.appendChild(envDiv);
+  }
+
+  function removeEnvVar(button) {
+    button.closest('.env-vars-item').remove();
+  }
+
+  function closeContainer() {
+    document.querySelector('.container').style.display = 'none';
+  }
+</script>
