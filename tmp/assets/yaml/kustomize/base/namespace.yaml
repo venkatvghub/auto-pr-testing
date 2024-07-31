@@ -1,0 +1,13 @@
+---
+# Source: kaptain-kube/templates/utils/namespace.yml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .ServiceName }}-service
+  labels:
+    ENVIRONMENT: {{ .Env }}
+    SERVICE: {{ .ServiceName }}
+    POD: {{ .Team }}
+    {{- if eq .Env "test" }}
+    cloner.io/enabled: 'true'
+    {{- end }}

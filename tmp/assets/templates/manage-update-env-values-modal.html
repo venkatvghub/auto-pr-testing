@@ -1,0 +1,118 @@
+<div id="autoCloseAlert" class="alert alert-success fade show" role="alert"
+    style="display: none; position: fixed; top: 100px; right: 100px; z-index: 9999;">
+    Environment variables updated successfully!
+</div>
+<div id="dataDiv" data-namespace={{.namespace}} data-deployment={{.deployment}}></div>
+<div class="modal-dialog modal-dialog-centered" data-namespace={{.namespace}} data-deployment={{.deployment}}
+    style="width: auto; max-width: 75%;">
+    <div class=" modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title">Update Environment Values</h5>
+        </div>
+        <div class="modal-body">
+            <form id="envValuesForm">
+                {{if .envVars}}
+                {{range .envVars}}
+                <div class="mb-3 flex flex-row">
+                    <label for="{{.Name}}" class="flex-initial px-2" style="min-width: 20%;">{{.Name}}</label>
+                    <div class=" flex-grow">
+                        <input type="text" class="form-control w-full" id="{{.Name}}" name="{{.Name}}"
+                            value="{{.Value}}">
+                    </div>
+                </div>
+                {{end}}
+                {{else}}
+                <div class="alert alert-warning" role="alert">
+                    No environment variables available.
+                </div>
+                {{end}}
+                <div id="newVariableContainer"></div>
+            </form>
+            <button class="btn btn-primary mt-2 rounded bg-grey-700" onclick="addVariableField()">Add New
+                Variable</button>
+            <!-- Progress Bar -->
+            <div id="progressBar" class="progress" style="height: 20px; display: none;">
+                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
+                    style="width: 100%">
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer d-flex justify-content-center">
+            <button type="button" onclick="submitFormAsJson()"
+                class="btn btn-secondary items-center rounded">Update</button>
+        </div>
+
+        <script>
+            function addVariableField() {
+                const container = document.getElementById('newVariableContainer');
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'form-control w-full';
+                input.placeholder = "Enter 'name=value'";
+                input.name = 'newEnv[]';
+
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'btn btn-danger btn-sm';
+                button.textContent = 'Remove';
+                button.onclick = function () { removeVariableField(this); };
+
+                const div = document.createElement('div');
+                div.className = 'mb-3 flex flex-row items-center';
+                div.appendChild(input);
+                div.appendChild(button);
+
+                input.addEventListener('change', function () {
+                    const value = this.value;
+                    if (!value.includes('=') || value.split('=').length !== 2) {
+                        alert("Please enter the variable in 'name=value' format.");
+                        this.value = ''; // clear the input if format is incorrect
+                    }
+                });
+
+                container.appendChild(div);
+            }
+
+            function removeVariableField(element) {
+                element.parentNode.remove();
+            }
+
+            function submitFormAsJson() {
+                const form = document.getElementById('envValuesForm');
+                const formData = new FormData(form);
+                const envVars = {};
+                formData.forEach((value, key) => {
+                    if (key === 'newEnv[]') {
+                        const split = value.split('=');
+                        if (split.length === 2) {
+                            envVars[split[0].trim()] = split[1].trim();
+                        }
+                    } else {
+                        envVars[key] = value;
+                    }
+                });
+
+                // Retrieve namespace from the modal's data attribute
+                const modal = document.querySelector('#dataDiv');
+                namespace = modal.getAttribute('data-namespace');
+                deployment = modal.getAttribute('data-deployment');
+
+                // Construct the final JSON object
+                const jsonPayload = {
+                    namespace: namespace,
+                    deployment: deployment,
+                    envVars: envVars
+                };
+                const json = JSON.stringify(jsonPayload);
+
+                console.log(json);
+                htmx.ajax('POST', '/ui/v1/namespace/manage/update-deployment-env-values', {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    values: jsonPayload,
+                    target: '#main-content',
+                    swap: 'outerHTML'
+                });
+            }
+        </script>

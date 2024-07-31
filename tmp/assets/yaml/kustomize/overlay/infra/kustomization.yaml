@@ -1,0 +1,27 @@
+kind: Kustomization
+apiVersion: kustomize.config.k8s.io/v1beta1
+
+resources:
+  - ../../base/
+
+{{- if .HasSecrets }}
+resources:
+  - external_secret.yaml
+  - push_encrypted_secret.yaml
+{{- end}}
+
+patches:
+  - path: deployment-patch.yaml
+    target:
+      group: apps
+      version: v1
+      kind: Deployment
+      name: {{ .ServiceName }}
+{{- if and (eq .EnvPrefix "prod") (eq .IncludeBeta "yes") }}
+  - path: beta-deployment-patch.yaml
+    target:
+      group: apps
+      version: v1
+      kind: Deployment
+      name: beta-{{ .ServiceName }}
+{{- end }}

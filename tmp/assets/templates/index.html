@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  <script src="https://unpkg.com/htmx.org@1.9.2"></script>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <title>Braavos</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+
+    .close-button {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      position: relative;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    label {
+      font-weight: bold;
+      margin-bottom: 5px;
+      display: block;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 8px;
+      box-sizing: border-box;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      text-align: center;
+      text-decoration: none;
+      outline: none;
+      color: #fff;
+      background-color: #4CAF50;
+      border: none;
+      border-radius: 15px;
+      box-shadow: 0 4px #999;
+    }
+
+    .btn:hover {
+      background-color: #3e8e41
+    }
+
+    .btn:active {
+      background-color: #3e8e41;
+      box-shadow: 0 5px #666;
+      transform: translateY(4px);
+    }
+
+    .btn-primary {
+      background-color: #008CBA;
+    }
+
+    .btn-danger {
+      background-color: #f44336;
+      margin-top: 10px;
+    }
+
+    .btn-success {
+      background-color: #4CAF50;
+      margin-top: 20px;
+    }
+
+    .env-vars-item {
+      margin-bottom: 10px;
+      border: 1px solid #ddd;
+      padding: 10px;
+      border-radius: 5px;
+      background-color: #f9f9f9;
+    }
+
+    .overlay {
+      position: fixed;
+      display: none;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 2;
+      cursor: pointer;
+    }
+
+    .overlay-content {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: white;
+      padding: 20px;
+      border-radius: 5px;
+    }
+
+    #main-content {
+      max-width: 1300px;
+      margin: 0 auto;
+    }
+
+    #search-bar-container {
+      width: 100%;
+    }
+
+    #namespace-search {
+      width: 100%;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th,
+    td {
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+    }
+
+    th {
+      background-color: #4a5568;
+      color: white;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+
+    tr:hover {
+      background-color: #ddd;
+    }
+
+    #namespace-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .toast {
+      min-width: 300px;
+    }
+
+    .toast .bg-success {
+      background-color: #28a745 !important;
+    }
+
+    .toast .bg-danger {
+      background-color: #dc3545 !important;
+    }
+  </style>
+</head>
+
+<body class="h-screen">
+  <div class="bg-gray-800 text-white p-1">
+    <h1 class="text-lg font-bold px-4">Braavos</h1>
+  </div>
+  <div class="flex h-screen overflow-y-auto">
+    <div class="w-64 bg-gray-100 dark:bg-gray-800 h-screen overflow-y-auto">
+      <nav class="grid items-start px-4 text-sm font-medium overflow-y-auto">
+        <!-- <a href="#" hx-get="/company" hx-target="#main-content" hx-swap="outerHTML" aria-selected="true"
+          aria-controls="main-content"
+          class="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-900 transition-all hover:text-gray-900 dark:text-gray-50 dark:hover:text-gray-50">Companies</a> -->
+        <a href="#" hx-get="/ui/v1/namespace/clone/list" hx-target="#main-content" hx-swap="outerHTML"
+          aria-selected="false" aria-controls="main-content"
+          class="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-900 transition-all hover:text-gray-900 dark:text-gray-50 dark:hover:text-gray-50">Clone
+          Namespace</a>
+        <!-- <a href="#" hx-get="/path/to/clone-cohort.html" hx-target="#main-content" hx-swap="outerHTML"
+          aria-selected="false" aria-controls="main-content"
+          class="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-900 transition-all hover:text-gray-900 dark:text-gray-50 dark:hover:text-gray-50">Clone
+          Cohort</a> -->
+        <a href="#" hx-get="/ui/v1/namespace/manage" hx-target="#main-content" hx-swap="outerHTML" aria-selected="false"
+          aria-controls="main-content"
+          class="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-900 transition-all hover:text-gray-900 dark:text-gray-50 dark:hover:text-gray-50">Manage
+          Namespaces</a>
+        <a href="#" hx-get="/ui/v1/argo/generate" hx-target="#main-content" hx-swap="outerHTML" aria-selected="false"
+          aria-controls="main-content"
+          class="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-900 transition-all hover:text-gray-900 dark:text-gray-50 dark:hover:text-gray-50">Create
+          New Service</a>
+      </nav>
+    </div>
+
+    <div class="flex-grow bg-gray-150 dark:bg-gray-800">
+      <div id="main-content" class="p-4"> <!-- Add padding for better spacing -->
+        <!-- Main content will be loaded here -->
+      </div>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+  <script src="https://unpkg.com/htmx.org@1.9.12/dist/ext/json-enc.js"></script>
+
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const sidebarLinks = document.querySelectorAll('nav a');
+      sidebarLinks.forEach(link => {
+        link.addEventListener('click', function () {
+          // Remove aria-selected from all links
+          sidebarLinks.forEach(link => {
+            link.setAttribute('aria-selected', 'false');
+          });
+          // Set aria-selected true on the clicked link
+          this.setAttribute('aria-selected', 'true');
+        });
+      });
+    });
+  </script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const startTime = Date.now();
+      const interval = setInterval(function () {
+        if (Date.now() - startTime > 300000) { // 300000 milliseconds = 5 minutes
+          clearInterval(interval);
+          document.querySelector('#auto-refresh').removeAttribute('hx-trigger');
+        }
+      }, 5000); // Check every 5 seconds
+    });
+  </script>
+  <script>
+    // Optional: Update progress bar based on server events or messages
+    document.body.addEventListener('htmx:afterOnLoad', function (event) {
+      var detail = event.detail;
+      if (detail && detail.content) {
+        var progress = parseInt(detail.content);
+        var progressBar = document.getElementById('loadingBar');
+        progressBar.style.width = progress + '%';
+        progressBar.setAttribute('aria-valuenow', progress);
+      }
+    });
+  </script>
+</body>
+
+</html>
