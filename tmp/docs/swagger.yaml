@@ -1,0 +1,886 @@
+basePath: /api/v1
+definitions:
+  api.CohortDeploymentRequestBody:
+    properties:
+      cohort:
+        type: string
+      feature_name:
+        type: string
+      services_config:
+        items:
+          $ref: '#/definitions/api.ServiceConfigRequest'
+        type: array
+    type: object
+  api.ConfigMapPatchRequestBody:
+    properties:
+      data:
+        additionalProperties:
+          type: string
+        type: object
+      namespace:
+        type: string
+    type: object
+  api.DeploymentPatchRequestBody:
+    properties:
+      container:
+        description: Deployment string `json:"deployment"`
+        type: string
+      image:
+        type: string
+      namespace:
+        type: string
+    type: object
+  api.ErrorResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  api.NSClonerRequestBody:
+    properties:
+      targetNamespace:
+        description: SourceNamespace string `json:"sourceNamespace"`
+        type: string
+    type: object
+  api.SecretPatchRequestBody:
+    properties:
+      data:
+        additionalProperties: true
+        type: object
+      namespace:
+        type: string
+    type: object
+  api.ServiceConfigRequest:
+    properties:
+      image:
+        type: string
+      name:
+        type: string
+    type: object
+  argo.KeyVal:
+    properties:
+      name:
+        type: string
+      value:
+        type: string
+    type: object
+  argo.RequestDTO:
+    properties:
+      appPort:
+        type: string
+      architecture:
+        type: string
+      autoScaling:
+        type: string
+      entity:
+        type: string
+      environment:
+        type: string
+      envvars:
+        items:
+          $ref: '#/definitions/argo.KeyVal'
+        type: array
+      healthCheckPort:
+        type: string
+      imageTag:
+        type: string
+      includeBeta:
+        type: string
+      livenessHealthCheckPath:
+        type: string
+      metricsPath:
+        type: string
+      metricsPort:
+        type: string
+      publicAccess:
+        type: string
+      readinessHealthCheckPath:
+        type: string
+      secrets:
+        items:
+          $ref: '#/definitions/argo.KeyVal'
+        type: array
+      secretsPath:
+        type: string
+      servicename:
+        type: string
+      startupCheckPath:
+        type: string
+      team:
+        type: string
+    type: object
+  github.PullRequestRequestBodyDTO:
+    properties:
+      commitMessage:
+        type: string
+      prBody:
+        type: string
+      prTitle:
+        type: string
+      repo:
+        type: string
+      sourceDir:
+        type: string
+      targetDir:
+        type: string
+    required:
+    - commitMessage
+    - prBody
+    - prTitle
+    - repo
+    - sourceDir
+    - targetDir
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: Kubernetes Braavos API URI:<br>&nbsp;&nbsp;https://{nw-server-hostname}:8080/api/v1<br><br>
+  title: Kubernetes Braavos API
+  version: 3.0.0
+paths:
+  /:
+    get:
+      consumes:
+      - application/json
+      description: Renders the index.html template
+      produces:
+      - text/html
+      responses:
+        "200":
+          description: index.html
+          schema:
+            type: string
+      summary: Show the index page
+      tags:
+      - index
+  /api/v1/pullrequest:
+    post:
+      consumes:
+      - application/json
+      description: Create a pull request based on the provided request body
+      parameters:
+      - description: Pull Request Request Body
+        in: body
+        name: requestBody
+        required: true
+        schema:
+          $ref: '#/definitions/github.PullRequestRequestBodyDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Pull Request created
+          schema:
+            type: string
+        "400":
+          description: Bad request
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Generate a pull request
+      tags:
+      - GitHub
+  /argo-cd/onboarding:
+    get:
+      consumes:
+      - application/json
+      description: Displays the Argo CD onboarding page
+      produces:
+      - text/html
+      responses:
+        "200":
+          description: argo-cd-onboarding.html
+          schema:
+            type: string
+      summary: Argo CD onboarding
+      tags:
+      - argo
+  /cohorts:
+    get:
+      description: Get services present in cohort file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Get services for cohort
+  /cohorts/deployment:
+    post:
+      consumes:
+      - application/json
+      description: Create a new namespace , clone all service entities into the new
+        namespace and overide image & configs
+      parameters:
+      - description: Cohort Deployment Request Body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/api.CohortDeploymentRequestBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Deploy a cohort
+  /configmaps/:configmap:
+    post:
+      consumes:
+      - application/json
+      description: Update a config map in a specific namespace
+      parameters:
+      - description: ConfigMap Update Request Body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/api.ConfigMapPatchRequestBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Update a config map
+  /deployment/env-values:
+    post:
+      consumes:
+      - application/json
+      description: Updates the environment values of a deployment
+      parameters:
+      - description: Deployment
+        in: formData
+        name: deployment
+        required: true
+        type: string
+      - description: Namespace
+        in: formData
+        name: namespace
+        required: true
+        type: string
+      - description: Environment Variables (JSON)
+        in: formData
+        name: envVars
+        required: true
+        type: string
+      produces:
+      - text/html
+      responses:
+        "200":
+          description: manage-namespaces.html
+          schema:
+            type: string
+        "400":
+          description: Invalid envVars format
+          schema:
+            type: string
+        "500":
+          description: error
+          schema:
+            type: string
+      summary: Update deployment environment values
+      tags:
+      - deployments
+  /deployment/env-values/modal:
+    get:
+      consumes:
+      - application/json
+      description: Displays a modal to update environment values of a deployment
+      parameters:
+      - description: Deployment
+        in: query
+        name: deployment
+        required: true
+        type: string
+      - description: Namespace
+        in: query
+        name: namespace
+        required: true
+        type: string
+      produces:
+      - text/html
+      responses:
+        "200":
+          description: manage-update-env-values-modal.html
+          schema:
+            type: string
+        "500":
+          description: error
+          schema:
+            type: string
+      summary: Update environment values modal
+      tags:
+      - deployments
+  /deployment/image:
+    post:
+      consumes:
+      - application/json
+      description: Updates the image of a specific container in a deployment
+      parameters:
+      - description: Deployment
+        in: formData
+        name: deployment
+        required: true
+        type: string
+      - description: Container
+        in: formData
+        name: container
+        required: true
+        type: string
+      - description: Namespace
+        in: formData
+        name: namespace
+        required: true
+        type: string
+      - description: Image
+        in: formData
+        name: image
+        required: true
+        type: string
+      produces:
+      - text/html
+      responses:
+        "200":
+          description: manage-namespaces.html
+          schema:
+            type: string
+        "500":
+          description: error
+          schema:
+            type: string
+      summary: Update deployment image
+      tags:
+      - deployments
+  /deployment/scale:
+    get:
+      consumes:
+      - application/json
+      description: Scales up or down the replicas of a deployment
+      parameters:
+      - description: Deployment
+        in: query
+        name: deployment
+        required: true
+        type: string
+      - description: Namespace
+        in: query
+        name: namespace
+        required: true
+        type: string
+      - description: Action (up or down)
+        in: query
+        name: action
+        required: true
+        type: string
+      produces:
+      - text/html
+      responses:
+        "200":
+          description: manage-namespaces.html
+          schema:
+            type: string
+        "500":
+          description: error
+          schema:
+            type: string
+      summary: Scale replicas
+      tags:
+      - deployments
+  /deployments/:deployment:
+    post:
+      consumes:
+      - application/json
+      description: Update the image of a deployment in a specific namespace
+      parameters:
+      - description: Deployment Image Set Request Body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/api.DeploymentPatchRequestBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Update deployment image
+  /generate-manifests:
+    post:
+      consumes:
+      - application/json
+      description: Generates Kubernetes manifests based on the provided request data
+        and returns a zip file containing the manifests.
+      parameters:
+      - description: Request body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/argo.RequestDTO'
+      produces:
+      - application/octet-stream
+      responses:
+        "200":
+          description: Generated manifests zip file
+          schema:
+            type: file
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: Generate Kubernetes manifests
+      tags:
+      - manifests
+  /namespace/clone:
+    post:
+      consumes:
+      - application/json
+      description: Clones a namespace
+      parameters:
+      - description: Source Namespace
+        in: formData
+        name: source_namespace
+        required: true
+        type: string
+      - description: Destination Namespace
+        in: formData
+        name: destination_namespace
+        required: true
+        type: string
+      produces:
+      - text/html
+      responses:
+        "200":
+          description: manage-namespaces.html
+          schema:
+            type: string
+        "400":
+          description: Source and target namespaces cannot be the same
+          schema:
+            type: string
+        "500":
+          description: error
+          schema:
+            type: string
+      summary: Clone namespace
+      tags:
+      - namespaces
+  /namespace/clone/modal:
+    get:
+      consumes:
+      - application/json
+      description: Displays a modal to clone a namespace
+      parameters:
+      - description: Namespace
+        in: query
+        name: namespace
+        required: true
+        type: string
+      produces:
+      - text/html
+      responses:
+        "200":
+          description: clone-namespace-modal.html
+          schema:
+            type: string
+      summary: Clone namespace modal
+      tags:
+      - namespaces
+  /namespace/details:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves and displays details of a specific namespace
+      parameters:
+      - description: Namespace ID
+        in: query
+        name: namespaceId
+        required: true
+        type: string
+      produces:
+      - text/html
+      responses:
+        "200":
+          description: manage-namespace-details.html
+          schema:
+            type: string
+        "500":
+          description: error
+          schema:
+            type: string
+      summary: Get namespace details
+      tags:
+      - namespaces
+  /namespace/ttl:
+    post:
+      consumes:
+      - application/json
+      description: Updates the TTL of a namespace
+      parameters:
+      - description: Namespace
+        in: query
+        name: namespace
+        required: true
+        type: string
+      - description: TTL
+        in: formData
+        name: ttl
+        required: true
+        type: string
+      produces:
+      - text/html
+      responses:
+        "200":
+          description: manage-namespaces.html
+          schema:
+            type: string
+        "500":
+          description: error
+          schema:
+            type: string
+      summary: Update TTL
+      tags:
+      - namespaces
+  /namespaces:
+    get:
+      description: Get all namespaces in the cluster
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+      summary: Get all namespaces
+  /namespaces/:namespace/cloneNamespace:
+    post:
+      consumes:
+      - application/json
+      description: Clone a namespace and its objects to a new namespace
+      parameters:
+      - description: Namespace clone request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/api.NSClonerRequestBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Clone a namespace
+  /namespaces/:namespace/configmaps/display:
+    get:
+      description: Display all config maps in the specified namespace
+      parameters:
+      - description: Namespace name
+        in: path
+        name: namespace
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Display config maps for a specific namespace
+  /namespaces/:namespace/deployments:
+    get:
+      description: Get all deployments in the specified namespace
+      parameters:
+      - description: Namespace name
+        in: path
+        name: namespace
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+      summary: Get deployments for a specific namespace
+  /namespaces/:namespace/deployments/:deployment/scaledown:
+    post:
+      consumes:
+      - application/json
+      description: Decrease the replica count of a deployment in a specific namespace
+      parameters:
+      - description: Namespace name
+        in: path
+        name: namespace
+        required: true
+        type: string
+      - description: Deployment name
+        in: path
+        name: deployment
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully scaled down the deployment
+          schema:
+            type: string
+        "400":
+          description: Bad request
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Scale down a deployment
+  /namespaces/:namespace/deployments/:deployment/scaleup:
+    post:
+      consumes:
+      - application/json
+      description: Increase the replica count of a deployment in a specific namespace
+      parameters:
+      - description: Namespace name
+        in: path
+        name: namespace
+        required: true
+        type: string
+      - description: Deployment name
+        in: path
+        name: deployment
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully scaled up the deployment
+          schema:
+            type: string
+        "400":
+          description: Bad request
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Scale up a deployment
+  /namespaces/:namespace/deployments/display:
+    get:
+      description: Display all deployments in the specified namespace
+      parameters:
+      - description: Namespace name
+        in: path
+        name: namespace
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Display deployments for a specific namespace
+  /namespaces/:namespace/secrets/display:
+    get:
+      description: Display all secrets in the specified namespace
+      parameters:
+      - description: Namespace name
+        in: path
+        name: namespace
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Display secrets for a specific namespace
+  /namespaces/{namespace}/cronjobs/{cronJob}/scaledown:
+    post:
+      consumes:
+      - application/json
+      description: Decrease the number of instances for a specified CronJob in a given
+        namespace
+      parameters:
+      - description: Namespace
+        in: path
+        name: namespace
+        required: true
+        type: string
+      - description: CronJob Name
+        in: path
+        name: cronJob
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully scaled down the CronJob
+          schema:
+            type: string
+        "400":
+          description: Bad request
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Scale down a CronJob
+      tags:
+      - CronJob
+  /namespaces/{namespace}/cronjobs/{cronJob}/scaleup:
+    post:
+      consumes:
+      - application/json
+      description: Increase the number of instances for a specified CronJob in a given
+        namespace
+      parameters:
+      - description: Namespace
+        in: path
+        name: namespace
+        required: true
+        type: string
+      - description: CronJob Name
+        in: path
+        name: cronJob
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully scaled up the CronJob
+          schema:
+            type: string
+        "400":
+          description: Bad request
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Scale up a CronJob
+      tags:
+      - CronJob
+  /namespaces/clonable:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves and displays a list of namespaces that can be cloned
+      produces:
+      - text/html
+      responses:
+        "200":
+          description: cloneable-namespace-list.html
+          schema:
+            type: string
+        "500":
+          description: error
+          schema:
+            type: string
+      summary: List clonable namespaces
+      tags:
+      - namespaces
+  /namespaces/manage:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves and displays a list of managed namespaces
+      produces:
+      - text/html
+      responses:
+        "200":
+          description: manage-namespaces.html
+          schema:
+            type: string
+        "500":
+          description: error
+          schema:
+            type: string
+      summary: Manage namespaces
+      tags:
+      - namespaces
+  /pod/details:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves and displays details of a specific pod
+      parameters:
+      - description: Namespace
+        in: query
+        name: namespace
+        required: true
+        type: string
+      produces:
+      - text/html
+      responses:
+        "200":
+          description: manage-pod-details.html
+          schema:
+            type: string
+        "500":
+          description: error
+          schema:
+            type: string
+      summary: Get pod details
+      tags:
+      - pods
+  /secrets/:secret:
+    post:
+      consumes:
+      - application/json
+      description: Update a secret in a specific namespace
+      parameters:
+      - description: Secret Update Request Body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/api.SecretPatchRequestBody'
+      - description: Secret patch request body
+        in: body
+        name: secretPatchRequestBody
+        required: true
+        schema:
+          $ref: '#/definitions/api.SecretPatchRequestBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Update a secret
+schemes:
+- http
+- https
+swagger: "2.0"
