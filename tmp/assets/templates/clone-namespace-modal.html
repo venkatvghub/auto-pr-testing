@@ -1,0 +1,31 @@
+<div class="modal-dialog modal-dialog-centered rounded-lg">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title">Enter Cloned Namespace name</h5>
+        </div>
+        <div class="modal-body rounded">
+            <form id="clone{{.namespace}}Form" method="post">
+                <div class="mb-3">
+
+                    <label for="name" class="form-label">Cloned namespace name:</label>
+                    <input type="text" class="form-control" id="name" name="destination_namespace"
+                        placeholder="Cloned Namespace Name (Max 20 chars)" maxlength="20">
+                    <input type="hidden" name="source_namespace" value="{{.namespace}}">
+                </div>
+                <div class="progress" style="display:none;">
+                    <div class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0"
+                        aria-valuemax="100" id="loadingBar"></div>
+                </div>
+            </form>
+            <div id="cloningInProgress" style="display:none;" class="alert alert-info">
+                Cloning in progress...
+            </div>
+        </div>
+        <div class="modal-footer d-flex justify-content-center">
+            <button id="cloneNamespaceBtn" hx-post="/ui/v1/namespace/clone" hx-target="#main-content" hx-trigger="click"
+                hx-swap="outerHTML" type="button" class="btn btn-secondary items-center rounded"
+                hx-include="#clone{{.namespace}}Form"
+                onclick="document.getElementById('cloningInProgress').style.display='block';">Submit</button>
+        </div>
+    </div>
+</div>

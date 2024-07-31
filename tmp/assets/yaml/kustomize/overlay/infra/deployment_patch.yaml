@@ -1,0 +1,24 @@
+# DO NOT CHANGE unless your application requires more resources to start with.
+# Please monitor the usage before increasing the resources.
+{{- if not .AutoScaling }}
+- op: replace
+  path: /spec/replicas
+  value: {{ .Replicas }}
+{{- end }}
+
+# resources cpu & memory
+- op: replace
+  path: /spec/template/spec/containers/0/resources/requests/cpu
+  value: {{ .RequestCPU }}
+
+- op: add 
+  path: /spec/template/spec/containers/0/resources/requests/memory
+  value: {{ .RequestMem }}
+
+- op: add
+  path: /spec/template/spec/containers/0/resources/limits/cpu
+  value: {{ .LimitCPU }}
+
+- op: add
+  path: /spec/template/spec/containers/0/resources/limits/memory
+  value: {{ .LimitMem }}
